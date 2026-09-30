@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ПК ГЭДК - Онлайн-продукты - Прототип запуска отчета</title>
+  <style>
+    :root {
+      --page: #f4f5f5;
+      --panel: #ffffff;
+      --toolbar: #f2f3f3;
+      --header: #e5e8e9;
+      --header-dark: #cbd1d3;
+      --line: #cfd4d6;
+      --line-soft: #e2e5e6;
+      --ink: #212526;
+      --muted: #666d70;
+      --accent: #0c678a;
+      --accent-dark: #084d68;
+      --accent-soft: #e6f2f6;
+      --danger: #b42020;
+      --danger-soft: #fff0f0;
+      --success: #28764a;
+      --success-soft: #edf8f1;
+      --shadow: 0 14px 42px rgba(0, 0, 0, .28);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--page);
+      font: 14px/1.35 Arial, "Segoe UI", sans-serif;
+    }
+
+    button, input, select { font: inherit; }
+
+    button, input, select { outline-offset: 2px; }
+
+    button { color: inherit; }
+
+    .app {
+      min-width: 980px;
+      min-height: 100vh;
+      background:
+        linear-gradient(112deg, rgba(255, 255, 255, .9) 0 65%, rgba(225, 232, 233, .72) 65% 100%),
+        repeating-linear-gradient(130deg, transparent 0 55px, rgba(80, 96, 100, .1) 56px 58px);
+    }
+
+    .topbar {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 0 28px;
+      border-top: 4px solid #26383d;
+      border-bottom: 1px solid #bfc5c7;
+      background: rgba(244, 246, 246, .92);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 108px;
+      font-size: 24px;
+      letter-spacing: .5px;
+    }
+
+    .brand-mark {
+      position: relative;
+      width: 42px;
+      height: 27px;
+      border: 2px solid #242b2d;
+      border-radius: 4px;
+      background: #d1aa00;
+      box-shadow: inset 5px 0 0 #efc915, inset -5px 0 0 #a98900;
+    }
+
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      right: -8px;
+      top: 7px;
+      width: 9px;
+      height: 10px;
+      border: 2px solid #242b2d;
+      border-left: 0;
+    }
+
+    .main-nav {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      height: 100%;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 126px;
+      padding: 0 14px;
+      border: 0;
+      border-left: 1px solid transparent;
+      border-right: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .nav-item:hover, .nav-item.active { background: #dce1e2; }
+    .nav-item.active { border-color: #c5cbcd; }
+    .nav-icon { font-size: 16px; color: #243a42; }
+    .caret { margin-left: auto; font-size: 10px; }
+    .top-spacer { flex: 1; }
+
+    .top-action {
+      height: 40px;
+      padding: 0 18px;
+      border: 0;
+      background: #d2d7d9;
+      cursor: pointer;
+    }
+
+    .account {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      font-size: 19px;
+    }
+
+    .toolbar {
+      height: 43px;
+      display: flex;
+      align-items: center;
+      gap: 1px;
+      padding: 0 14px;
+      border-bottom: 1px solid #bfc5c7;
+      background: var(--toolbar);
+    }
+
+    .tool-button {
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 13px;
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .tool-button:hover:not(:disabled) { border-color: #c7cdcf; background: #e5e8e9; }
+    .tool-button:disabled { color: #a6abad; cursor: default; }
+    .tool-icon { width: 16px; text-align: center; font-weight: 700; }
+    .separator { width: 1px; height: 24px; margin: 0 6px; background: #cfd4d6; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(590px, 37%) 1fr;
+      gap: 14px;
+      height: calc(100vh - 103px);
+      min-height: 620px;
+      padding: 8px 12px 12px;
+    }
+
+    .pane {
+      min-width: 0;
+      border: 1px solid #b9c0c2;
+      background: rgba(255, 255, 255, .94);
+      overflow: hidden;
+    }
+
+    .pane-tabs {
+      height: 43px;
+      display: flex;
+      align-items: stretch;
+      border-bottom: 1px solid #b7bec0;
+      background: #cfd4d6;
+    }
+
+    .pane-tab {
+      min-width: 205px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 18px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .pane-tab.active { border-bottom-color: #1c2224; background: rgba(255, 255, 255, .12); }
+    .pane-tab:not(.active) { font-weight: 400; }
+
+    .product-grid {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .product-grid th, .product-grid td {
+      height: 34px;
+      padding: 0 8px;
+      border-bottom: 1px solid #dde1e2;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .product-grid th { color: #6a7173; background: #e8eaeb; font-weight: 400; }
+    .product-grid .check { width: 36px; text-align: center; }
+    .product-grid .num { width: 50px; }
+    .product-grid .code { width: 192px; }
+    .product-grid tbody tr { cursor: pointer; }
+    .product-grid tbody tr:hover { background: #f2f7f9; }
+    .product-grid tbody tr.selected { background: #e5f1f5; }
+    .product-grid input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); }
+
+    .details {
+      padding: 26px 32px;
+    }
+
+    .detail-row {
+      display: grid;
+      grid-template-columns: 165px minmax(260px, 420px);
+      align-items: end;
+      margin-bottom: 16px;
+    }
+
+    .detail-label { color: #6c7375; }
+    .detail-value { min-height: 27px; padding: 4px 0; border-bottom: 1px solid #d4d8d9; }
+    .required { color: #c02e2e; }
+
+    .scrim {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(22, 27, 29, .58);
+    }
+
+    .scrim.visible { display: flex; }
+
+    .modal {
+      width: 620px;
+      max-height: calc(100vh - 48px);
+      border-radius: 3px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: auto;
+      transform-origin: center;
+      animation: show-modal .14s ease-out;
+    }
+
+    @keyframes show-modal {
+      from { opacity: 0; transform: translateY(-8px) scale(.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-header {
+      height: 58px;
+      display: grid;
+      grid-template-columns: 70px 1fr 70px;
+      align-items: center;
+      border-bottom: 1px solid #f1f2f2;
+    }
+
+    .modal-title { margin: 0; text-align: center; font-size: 17px; font-weight: 400; }
+    .window-actions { display: flex; justify-content: flex-end; padding-right: 17px; }
+    .window-button {
+      width: 25px;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      font-size: 19px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .window-button:hover { background: #eceeee; }
+
+    .modal-body { padding: 23px 56px 10px; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 16px;
+    }
+
+    .field-label { padding-top: 8px; color: #6a7173; }
+
+    .line-input, .line-select {
+      width: 100%;
+      min-height: 38px;
+      padding: 7px 35px 6px 4px;
+      border: 0;
+      border-bottom: 1px solid #cfd4d6;
+      border-radius: 0;
+      color: #454b4d;
+      background-color: #fff;
+    }
+
+    .line-select { padding-right: 30px; }
+
+    .line-input:focus, .line-select:focus { border-bottom-color: var(--accent); box-shadow: 0 1px 0 var(--accent); }
+    .input-wrap { position: relative; }
+    .field-hint { margin: 5px 0 0 4px; color: #747b7d; font-size: 12px; }
+    .conditional { display: none; }
+    .conditional.visible { display: grid; }
+
+    .field-error {
+      display: none;
+      margin: 5px 0 0 4px;
+      color: var(--danger);
+      font-size: 12px;
+    }
+
+    .invalid .line-input, .invalid .line-select { border-bottom-color: var(--danger); }
+    .invalid .field-error { display: block; }
+
+    .modal-footer {
+      min-height: 76px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 22px 20px;
+    }
+
+    .button {
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 6px 13px;
+      border: 1px solid #c6cbcd;
+      border-radius: 2px;
+      background: #f4f5f5;
+      cursor: pointer;
+    }
+
+    .button:hover { background: #e7eaeb; }
+    .button.primary { color: #fff; border-color: var(--accent); background: var(--accent); }
+    .button.primary:hover { border-color: var(--accent-dark); background: var(--accent-dark); }
+    .button:disabled { color: #9aa0a2; border-color: #d5d9da; background: #f4f5f5; cursor: default; }
+    .save-icon { width: 14px; height: 14px; display: block; }
+
+    .toast {
+      position: fixed;
+      z-index: 60;
+      right: 24px;
+      top: 116px;
+      width: 440px;
+      display: none;
+      gap: 12px;
+      padding: 15px 16px;
+      border: 1px solid #b8d5c4;
+      border-left: 4px solid var(--success);
+      background: var(--success-soft);
+      box-shadow: 0 5px 18px rgba(0, 0, 0, .14);
+    }
+
+    .toast.visible { display: flex; animation: toast-in .16s ease-out; }
+    @keyframes toast-in { from { opacity: 0; transform: translateX(10px); } }
+    .toast-icon { color: var(--success); font-size: 20px; }
+    .toast-title { margin-bottom: 3px; font-weight: 700; }
+    .toast-text { color: #4b5851; }
+    .toast-link { margin-top: 7px; padding: 0; border: 0; color: #075d80; background: transparent; cursor: pointer; text-decoration: underline; }
+    .toast-close { margin-left: auto; align-self: flex-start; padding: 0 2px; border: 0; background: transparent; cursor: pointer; }
+
+    .reports-drawer {
+      position: fixed;
+      z-index: 55;
+      inset: 103px 0 0;
+      display: none;
+      padding: 22px;
+      background: #f3f5f5;
+    }
+
+    .reports-drawer.visible { display: block; }
+    .reports-card { height: 100%; border: 1px solid #bbc2c4; background: #fff; }
+    .reports-head { height: 46px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; background: #cfd4d6; }
+    .reports-head h2 { margin: 0; font-size: 15px; }
+    .reports-close { border: 0; background: transparent; font-size: 19px; cursor: pointer; }
+    .reports-table { width: 100%; border-collapse: collapse; }
+    .reports-table th, .reports-table td { height: 43px; padding: 8px 14px; border-bottom: 1px solid #dde1e2; text-align: left; }
+    .reports-table th { color: #626a6d; background: #e8eaeb; font-weight: 400; }
+    .status-pill { display: inline-block; padding: 3px 8px; border-radius: 12px; color: #7a5b00; background: #fff4c7; font-size: 12px; }
+
+    .prototype-note {
+      position: fixed;
+      z-index: 20;
+      left: 20px;
+      bottom: 18px;
+      max-width: 460px;
+      padding: 9px 12px;
+      color: #495356;
+      border: 1px solid #cad4d7;
+      background: rgba(245, 249, 250, .94);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+      font-size: 12px;
+    }
+
+    @media (max-width: 1100px) {
+      .app { min-width: 760px; }
+      .workspace { grid-template-columns: 56% 44%; }
+      .main-nav .nav-item:nth-child(4) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" aria-label="Прототип ПК ГЭДК">
+    <header class="topbar">
+      <div class="brand" aria-label="ГЭДК"><span class="brand-mark" aria-hidden="true"></span><span>ГЭДК</span></div>
+      <nav class="main-nav" aria-label="Основное меню">
+        <button class="nav-item" type="button"><span class="nav-icon">▣</span><span>Поиск</span><span class="caret">▼</span></button>
+        <button class="nav-item active" type="button"><span class="nav-icon">▤</span><span>Справочники</span><span class="caret">▼</span></button>
+        <button id="reports-nav" class="nav-item" type="button"><span class="nav-icon">▥</span><span>Отчеты</span><span class="caret">▼</span></button>
+        <button class="nav-item" type="button"><span class="nav-icon">⚙</span><span>Администрирование</span><span class="caret">▼</span></button>
+      </nav>
+      <button class="top-action" type="button">Создать　▼</button>
+      <div class="top-spacer"></div>
+      <div class="account" aria-label="Пользователь"><span>?</span><span>⌄</span><span>◉</span><span>⌄</span></div>
+    </header>
+
+    <div class="toolbar" role="toolbar" aria-label="Действия">
+      <button class="tool-button" type="button"><span class="tool-icon">⟳</span>Обновить</button>
+      <button class="tool-button" type="button"><span class="tool-icon">●</span>Добавить</button>
+      <button class="tool-button" type="button"><span class="tool-icon">▥</span>Удалить</button>
+      <button class="tool-button" type="button" disabled><span class="tool-icon">▣</span>Сохранить</button>
+      <span class="separator" aria-hidden="true"></span>
+      <button id="open-report" class="tool-button" type="button"><span class="tool-icon">⚙</span>Сформировать отчет</button>
+    </div>
+
+    <main class="workspace">
+      <section class="pane" aria-labelledby="products-title">
+        <div class="pane-tabs"><button id="products-title" class="pane-tab active" type="button">ОНЛАЙН-ПРОДУКТЫ</button></div>
+        <table class="product-grid">
+          <thead>
+            <tr><th class="check"><input id="select-all" type="checkbox" aria-label="Выбрать все продукты"></th><th class="num">№</th><th>Наименование</th><th class="code">Обозначение</th></tr>
+          </thead>
+          <tbody id="product-body">
+            <tr class="selected" data-name="Онлайн-открытие банковского счета с выпуском карты"><td class="check"><input type="checkbox" checked aria-label="Выбрать продукт 45"></td><td>45</td><td>Онлайн-открытие банковского счета с выпуском карты</td><td>PrvDbAAA027YELOV...</td></tr>
+            <tr class="selected" data-name="Онлайн-открытие банковского счета с выпуском карты"><td class="check"><input type="checkbox" checked aria-label="Выбрать продукт 46"></td><td>46</td><td>Онлайн-открытие банковского счета с выпуском карты</td><td>CB</td></tr>
+            <tr data-name="Онлайн-открытие банковского счета с выпуском карты"><td class="check"><input type="checkbox" aria-label="Выбрать продукт 47"></td><td>47</td><td>Онлайн-открытие банковского счета с выпуском карты</td><td>PrvDbAAA050PSPR...</td></tr>
+            <tr data-name="Онлайн-открытие банковского счета с выпуском карты"><td class="check"><input type="checkbox" aria-label="Выбрать продукт 48"></td><td>48</td><td>Онлайн-открытие банковского счета с выпуском карты</td><td>PrvDbAAA051PSMA...</td></tr>
+            <tr data-name="Онлайн-открытие банковского счета с выпуском карты"><td class="check"><input type="checkbox" aria-label="Выбрать продукт 49"></td><td>49</td><td>Онлайн-открытие банковского счета с выпуском карты</td><td>PrvDbAAA051PSOP...</td></tr>
+            <tr data-name="Онлайн-открытие банковского счета с выпуском карты"><td class="check"><input type="checkbox" aria-label="Выбрать продукт 50"></td><td>50</td><td>Онлайн-открытие банковского счета с выпуском карты</td><td>PrvDbAAA051PSPRE...</td></tr>
+            <tr data-name="Онлайн-открытие банковского счета с выпуском карты"><td class="check"><input type="checkbox" aria-label="Выбрать продукт 51"></td><td>51</td><td>Онлайн-открытие банковского счета с выпуском карты</td><td>PrvDbAAA047PSMA...</td></tr>
+            <tr data-name="Онлайн-открытие банковского счета с выпуском виртуальной карты"><td class="check"><input type="checkbox" aria-label="Выбрать продукт 60"></td><td>60</td><td>Онлайн-открытие банковского счета с выпуском виртуальной карты</td><td>CB</td></tr>
+            <tr data-name="Онлайн-открытие банковского счета с выпуском виртуальной карты"><td class="check"><input type="checkbox" aria-label="Выбрать продукт 61"></td><td>61</td><td>Онлайн-открытие банковского счета с выпуском виртуальной карты</td><td>CE</td></tr>
+            <tr data-name="Выпуск банковской платежной карточки онлайн"><td class="check"><input type="checkbox" aria-label="Выбрать продукт 65"></td><td>65</td><td>Выпуск банковской платежной карточки онлайн</td><td>PrvDbAAA027PSBA...</td></tr>
+            <tr data-name="Онлайн-кредитование физических лиц"><td class="check"><input type="checkbox" aria-label="Выбрать продукт 68"></td><td>68</td><td>Онлайн-кредитование физических лиц</td><td>ONLINE_CREDIT</td></tr>
+            <tr data-name="Онлайн-вклад"><td class="check"><input type="checkbox" aria-label="Выбрать продукт 71"></td><td>71</td><td>Онлайн-вклад</td><td>ONLINE_DEPOSIT</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="pane" aria-label="Детали продукта">
+        <div class="pane-tabs">
+          <button class="pane-tab active" type="button">ДЕТАЛИ ПРОДУКТА</button>
+          <button class="pane-tab" type="button">КОМПЛЕКТЫ ДОКУМЕНТОВ</button>
+          <button class="pane-tab" type="button">ПОЛЬЗОВАТЕЛИ</button>
+        </div>
+        <div class="details">
+          <div class="detail-row"><span class="detail-label">№ <span class="required">*</span>:</span><span class="detail-value">45</span></div>
+          <div class="detail-row"><span class="detail-label">Наименование <span class="required">*</span>:</span><span class="detail-value">Онлайн-открытие банковского счета с выпуском карты</span></div>
+          <div class="detail-row"><span class="detail-label">Описание:</span><span class="detail-value">Онлайн-продукт</span></div>
+          <div class="detail-row"><span class="detail-label">Обозначение <span class="required">*</span>:</span><span class="detail-value">PrvDbAAA027YELOV</span></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="report-scrim" class="scrim" aria-hidden="true">
+    <section id="report-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <header class="modal-header">
+        <span></span>
+        <h1 id="modal-title" class="modal-title">Сформировать отчет</h1>
+        <div class="window-actions">
+          <button id="close-modal" class="window-button" type="button" aria-label="Закрыть окно" title="Закрыть окно">×</button>
+        </div>
+      </header>
+
+      <form id="report-form" novalidate>
+        <div class="modal-body">
+          <div id="from-row" class="form-row">
+            <label class="field-label" for="date-from">Дата с <span class="required">*</span>:</label>
+            <div>
+              <div class="input-wrap"><input id="date-from" class="line-input" type="date" value="2026-07-30" required></div>
+              <p class="field-error">Укажите начало периода.</p>
+            </div>
+          </div>
+
+          <div id="to-row" class="form-row">
+            <label class="field-label" for="date-to">Дата по <span class="required">*</span>:</label>
+            <div>
+              <div class="input-wrap"><input id="date-to" class="line-input" type="date" value="2026-07-31" required></div>
+              <p class="field-error">Дата окончания должна быть не раньше даты начала.</p>
+            </div>
+          </div>
+
+          <div id="mode-row" class="form-row">
+            <label class="field-label" for="report-mode">Вид отчета <span class="required">*</span>:</label>
+            <div>
+              <select id="report-mode" class="line-select" required>
+                <option value="all">Все верифицированные документы</option>
+                <option value="deviations" selected>Только документы с расхождениями</option>
+              </select>
+              <p class="field-hint">В полном отчете можно вывести все документы или только расхождения.</p>
+            </div>
+          </div>
+
+          <div id="state-row" class="form-row conditional visible">
+            <label class="field-label" for="state-date">Дата состояния:</label>
+            <div>
+              <div class="input-wrap"><input id="state-date" class="line-input" type="date" value="2026-07-30"></div>
+              <p class="field-hint">Необязательно. Если дата указана, отчет покажет расхождения на выбранную дату и дату их последующего устранения.</p>
+              <p class="field-error">Дата состояния должна входить в выбранный период.</p>
+            </div>
+          </div>
+        </div>
+
+        <footer class="modal-footer">
+          <button id="submit-report" class="button primary" type="submit">
+            <svg class="save-icon" aria-hidden="true" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2.5 2.5H11.5L13.5 4.5V13.5H2.5V2.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+              <path d="M5 2.5V6H10.5V2.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+              <path d="M5 13.5V9H11V13.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+            </svg>
+            Сохранить
+          </button>
+        </footer>
+      </form>
+    </section>
+  </div>
+
+  <aside id="success-toast" class="toast" role="status" aria-live="polite">
+    <span class="toast-icon">✓</span>
+    <div>
+      <div class="toast-title">Формирование отчета запущено</div>
+      <div class="toast-text">Отчет формируется асинхронно и после завершения будет доступен в разделе "Отчеты" - "Сформированные отчеты".</div>
+      <button id="open-reports" class="toast-link" type="button">Перейти к сформированным отчетам</button>
+    </div>
+    <button id="close-toast" class="toast-close" type="button" aria-label="Закрыть уведомление">×</button>
+  </aside>
+
+  <section id="reports-drawer" class="reports-drawer" aria-label="Сформированные отчеты">
+    <div class="reports-card">
+      <header class="reports-head"><h2>СФОРМИРОВАННЫЕ ОТЧЕТЫ</h2><button id="close-reports" class="reports-close" type="button" aria-label="Закрыть">×</button></header>
+      <table class="reports-table">
+        <thead><tr><th>Дата создания</th><th>Автор</th><th>Наименование</th><th>Статус</th><th>Действие</th></tr></thead>
+        <tbody><tr><td id="report-created">31.07.2026 15:30</td><td>Текущий пользователь</td><td id="report-name">Полный отчет по верификации документов</td><td><span class="status-pill">Формируется</span></td><td>Скачать после завершения</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="prototype-note">Кликабельный прототип. Выберите продукты, нажмите "Сформировать отчет", измените состав отчета и проверьте валидацию дат.</div>
+
+  <script>
+    (function () {
+      const productBody = document.getElementById("product-body");
+      const productChecks = Array.from(productBody.querySelectorAll("input[type='checkbox']"));
+      const selectAll = document.getElementById("select-all");
+      const openReport = document.getElementById("open-report");
+      const scrim = document.getElementById("report-scrim");
+      const form = document.getElementById("report-form");
+      const closeModal = document.getElementById("close-modal");
+      const dateFrom = document.getElementById("date-from");
+      const dateTo = document.getElementById("date-to");
+      const mode = document.getElementById("report-mode");
+      const stateDate = document.getElementById("state-date");
+      const fromRow = document.getElementById("from-row");
+      const toRow = document.getElementById("to-row");
+      const stateRow = document.getElementById("state-row");
+      const toast = document.getElementById("success-toast");
+      const reportsDrawer = document.getElementById("reports-drawer");
+
+      function chosenProducts() {
+        return productChecks.filter((item) => item.checked);
+      }
+
+      function refreshSelection() {
+        productChecks.forEach((checkbox) => checkbox.closest("tr").classList.toggle("selected", checkbox.checked));
+        const count = chosenProducts().length;
+        openReport.disabled = count === 0;
+        selectAll.checked = count === productChecks.length;
+        selectAll.indeterminate = count > 0 && count < productChecks.length;
+      }
+
+      function openDialog() {
+        if (!chosenProducts().length) return;
+        scrim.classList.add("visible");
+        scrim.setAttribute("aria-hidden", "false");
+        toast.classList.remove("visible");
+        dateFrom.focus();
+      }
+
+      function closeDialog() {
+        scrim.classList.remove("visible");
+        scrim.setAttribute("aria-hidden", "true");
+        openReport.focus();
+      }
+
+      function updateMode() {
+        const deviations = mode.value === "deviations";
+        stateRow.classList.toggle("visible", deviations);
+        stateDate.required = false;
+        stateRow.classList.remove("invalid");
+      }
+
+      function validate() {
+        const hasFrom = Boolean(dateFrom.value);
+        const hasTo = Boolean(dateTo.value);
+        const ordered = hasFrom && hasTo && dateFrom.value <= dateTo.value;
+        const needsState = mode.value === "deviations";
+        const stateSpecified = Boolean(stateDate.value);
+        const stateOk = !needsState || !stateSpecified || ordered && stateDate.value >= dateFrom.value && stateDate.value <= dateTo.value;
+
+        fromRow.classList.toggle("invalid", !hasFrom);
+        toRow.classList.toggle("invalid", !hasTo || hasFrom && hasTo && !ordered);
+        stateRow.classList.toggle("invalid", !stateOk);
+        return hasFrom && hasTo && ordered && stateOk;
+      }
+
+      productBody.addEventListener("click", function (event) {
+        if (event.target.matches("input[type='checkbox']")) return;
+        const row = event.target.closest("tr");
+        if (!row) return;
+        const checkbox = row.querySelector("input[type='checkbox']");
+        checkbox.checked = !checkbox.checked;
+        refreshSelection();
+      });
+
+      productChecks.forEach((checkbox) => checkbox.addEventListener("change", refreshSelection));
+
+      selectAll.addEventListener("change", function () {
+        productChecks.forEach((checkbox) => { checkbox.checked = selectAll.checked; });
+        refreshSelection();
+      });
+
+      openReport.addEventListener("click", openDialog);
+      closeModal.addEventListener("click", closeDialog);
+      mode.addEventListener("change", updateMode);
+
+      scrim.addEventListener("click", function (event) {
+        if (event.target === scrim) closeDialog();
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && scrim.classList.contains("visible")) closeDialog();
+      });
+
+      [dateFrom, dateTo, stateDate].forEach((input) => input.addEventListener("input", function () {
+        input.closest(".form-row").classList.remove("invalid");
+      }));
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (!validate()) return;
+        const reportName = mode.value === "deviations"
+          ? stateDate.value
+            ? "Отчет по расхождениям на " + stateDate.value.split("-").reverse().join(".")
+            : "Отчет по расхождениям за период"
+          : "Полный отчет по верификации документов";
+        document.getElementById("report-name").textContent = reportName;
+        closeDialog();
+        toast.classList.add("visible");
+      });
+
+      function showReports() {
+        reportsDrawer.classList.add("visible");
+        toast.classList.remove("visible");
+      }
+
+      document.getElementById("open-reports").addEventListener("click", showReports);
+      document.getElementById("reports-nav").addEventListener("click", showReports);
+      document.getElementById("close-reports").addEventListener("click", function () { reportsDrawer.classList.remove("visible"); });
+      document.getElementById("close-toast").addEventListener("click", function () { toast.classList.remove("visible"); });
+
+      refreshSelection();
+      updateMode();
+      openDialog();
+    }());
+  </script>
+</body>
+</html>
